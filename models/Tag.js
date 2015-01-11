@@ -1,13 +1,12 @@
-
-var mongoose = require("../lib/database"),
+var rekuire = require("rekuire")
+    mongoose = rekuire("database"),
     autoIncrement = require("mongoose-auto-increment"),
     Schema = mongoose.Schema,
     ObjectID = Schema.Types.ObjectID;
 
-var Notification = new Schema({
-    userId:{type:Schema.Types.ObjectId, ref:'User'},
-    eventId:String,
-    message:String // created by compiling eventDetails with Data to replace placeholders
+var Tag = new Schema({
+    tagId:Number,
+    name:String
 });
 Tag.plugin(autoIncrement.plugin,{model:'Tag',field:'tagId',startAt:1000});
 module.exports = mongoose.model('Tag', Tag);

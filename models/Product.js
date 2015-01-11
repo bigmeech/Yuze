@@ -1,20 +1,21 @@
-var mongoose = require("../lib/database"),
+var rekuire = require("rekuire")
+    mongoose = rekuire("database"),
     autoIncrement = require("mongoose-auto-increment"),
     findOrCreate = require("mongoose-findorcreate"),
     Schema = mongoose.Schema,
-    ObjectID = Schema.Types.ObjectID;
+    ObjectID = Schema.Types.ObjectId;
 
 var Product = new Schema({
     productId:Number,
-    creator:{type:Schema.Types.ObjectId, ref:'User'},
+    creator:{type:ObjectID, ref:'User'},
     barcode:Object,
     name:String,
     likes:Number,
     dislikes:Number,
-    followers:[User],
-    comments:[Comment]
-
+    followers:[{type:ObjectID, ref:'User'}],
+    comments:[{type:ObjectID, ref:'Comment'}]
 });
+
 Product.plugin(autoIncrement.plugin,{model:'Product',field:'productId',startAt:1000});
 Product.plugin(findOrCreate);
 module.exports = mongoose.model('Product', Product);

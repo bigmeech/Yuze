@@ -1,5 +1,5 @@
-
-var mongoose = require("../lib/database"),
+var rekuire = require("rekuire")
+    mongoose = rekuire("database"),
     autoIncrement = require("mongoose-auto-increment"),
     Schema = mongoose.Schema,
     ObjectID = Schema.Types.ObjectID;

@@ -11,7 +11,8 @@ var passport = require("passport");
 
 //libs
 var mongoose = require("./libs/database");
-var router = require("./libs/router");
+var loader = require("./libs/loader");
+var auth = require("./libs/authentication");
 
 var app = express();
 var sessionStore;
@@ -33,7 +34,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//initialize router
-router(app)
+//load routes and models
+loader(app);
+
+//do authentication bits
+auth(app);
 
 module.exports = app;

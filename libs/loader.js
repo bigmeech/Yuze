@@ -17,24 +17,42 @@ var _ = require("lodash");
  *
  * */
 
-var readDir = function (dir, app) {
+var readDir = function (routerPath, modelPath, app) {
     /*
      *
      * Based on filenames, get existing route-level middlewares and dynamically load it
      *
      * */
-    if (fs.existsSync(dir)) {
-        fs.readdirSync(dir).forEach(function (file) {
-            var filePath = path.join(dir, file);
+    if (fs.existsSync(routerPath)) {
+        fs.readdirSync(routerPath).forEach(function (file) {
+            var filePath = path.join(routerPath, file);
             if (filePath.match(/\.js$/)) {
                 var route = require("../" + filePath);
                 app.use(route);
             }
             if (fs.lstatSync(filePath).isDirectory()) {
-                return readDir(filePath, app)
+                return readDir(filePath, modelPath, app)
             }
         })
     }
+
+
+    /*
+    *
+    *
+    * Load models too
+    *
+    * */
+
+     if (fs.existsSync(modelPath)) {
+        fs.readdirSync(modelPath).forEach(function (file) {
+            var filePath = path.join(modelPath, file);
+            if (filePath.match(/\.js$/)) {
+                require("../" + filePath);
+            }
+        })
+    }
+
 
 
     // catch 404 and forward to error handler
@@ -69,5 +87,5 @@ var readDir = function (dir, app) {
     });
 };
 
-module.exports = readDir.bind(null, "routes");
+module.exports = readDir.bind(null, "routes", "models");
 
