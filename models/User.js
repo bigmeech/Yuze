@@ -6,6 +6,7 @@ var rekuire = require("rekuire")
     ObjectID = Schema.Types.ObjectID;
 
 var User = new Schema({
+    username:String,
     userId: Number,
     firstname: String,
     lastname: String,
