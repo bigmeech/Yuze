@@ -8,7 +8,7 @@
 
 var fs = require("fs");
 var path = require("path");
-var app = require("express")();
+var _ = require("lodash");
 
 /*
  *
@@ -16,49 +16,58 @@ var app = require("express")();
  *  if it meets a folder, recurse the method again
  *
  * */
+
 var readDir = function (dir, app) {
-    if(fs.existsSync(dir)){
-        fs.readdirSync(dir).forEach(function(file){
+    /*
+     *
+     * Based on filenames, get existing route-level middlewares and dynamically load it
+     *
+     * */
+    if (fs.existsSync(dir)) {
+        fs.readdirSync(dir).forEach(function (file) {
             var filePath = path.join(dir, file);
             if (filePath.match(/\.js$/)) {
-                require("../" + filePath)(app);
+                var route = require("../" + filePath);
+                app.use(route);
             }
             if (fs.lstatSync(filePath).isDirectory()) {
-                readDir(filePath, app)
+                return readDir(filePath, app)
             }
         })
     }
-};
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
-});
+
+    // catch 404 and forward to error handler
+    app.use(function (req, res, next) {
+        var err = new Error('Not Found');
+        err.status = 404;
+        next(err);
+    });
 
 // error handlers
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
+    if (app.get('env') === 'development') {
+        app.use(function (err, req, res, next) {
+            res.status(err.status || 500);
+            res.render('error', {
+                message: err.message,
+                error: err
+            });
         });
-    });
-}
+    }
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
+    app.use(function (err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: {}
+        });
     });
-});
+};
 
-module.exports = readDir.bind(null, "routes", app);
+module.exports = readDir.bind(null, "routes");
+
