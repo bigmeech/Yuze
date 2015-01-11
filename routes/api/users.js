@@ -9,6 +9,14 @@ var DB = rek('database');
 /*
  *
  * Route Definitions
+ * -----------------------------------------
+ * Show - Get request to /user/show/<userId>
+ * Edit - Put request to /user/edit/<userId>
+ * Create - post request to /user/create
+ * delete - delete request to /user/remove/<userId>
+ *
+ *
+ *     Todo:Need to find a way to make this CRUD more centralised, so i dont have to reinvewnt this wheel for every route/controller
  *
  * */
 
@@ -42,13 +50,24 @@ function showUsers(req, res) {
 /*
  *
  * Edit user Operation - Edits using skipping all unique indexes
- * @req - Client Request
- * @res - Server Response
+ * @req - Received Client Request
+ * @res - Unsent Server Response
  *
  * */
 
 function deleteUsers(req, res) {
-    res.send('respond with a resource');
+    //get input from client
+    var input = req.params;
+
+    //get model
+    var User = DB.model('User');
+
+    //Operation
+    User.remove({userId: input.id}, function (err) {
+        if (err) return res.json({error: true, details: "invalid user", errorObj: err}, 404);
+        return res.json({message: "User account deleted successfully!"})
+    });
+
 }
 
 /*
@@ -67,18 +86,21 @@ function editUsers(req, res) {
     var User = DB.model('User');
 
     //Operation
-    User.findOne({userId: input.id})
-        .exec()
-        .then(function(User) {
-            for(var prop in data){
-                User[prop] = data[prop]
-            }
-            User.save(function(err, data){
-                if(err) return res.json(err, 404);
-                return res.json(data)
-            })
-        });
+    User.findOne({userId: input.id}, function(err, doc){
+        //do necerassry check and respond with appropirate message
+        if(err) return res.json(err, 404);
+        if(!user) return res.json({error: true, details: "No such user "+input.id, errorObj: err}, 404);
 
+        var user = doc.toObject();
+        for (var prop in user) {
+            user[prop] = data[prop]
+        }
+
+        user.save(function (err, userData) {
+            if (err) return res.json(err, 404);
+            return res.json(userData);
+        })
+    });
 }
 
 
