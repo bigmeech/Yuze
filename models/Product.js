@@ -10,9 +10,9 @@ var Product = new Schema({
     creator:{type:ObjectID, ref:'User'},
     barcode:Object,
     name:String,
-    likes:[{type:ObjectID, ref:'User'}], //should juist be an array of users. Note you either either on this list or on the dislikes list
-    dislikes:[{type:ObjectID, ref:'User'}], //should just be an array of users. Note you either either on this list or on the likes list
-    followers:[{type:ObjectID, ref:'User'}],
+    likes:[{type:ObjectID, ref:'User'}], //should juist be an array of users. Note you are either on this list or on the dislikes list
+    dislikes:[{type:ObjectID, ref:'User'}], //should just be an array of users. Note you are either on this list or on the likes list
+    followers:[{type:ObjectID, ref:'User'}], //should just be an array of users.
     comments:[{type:ObjectID, ref:'Comment'}]
 });
 

@@ -55,7 +55,6 @@ function createProduct(req, res){
 
     //do operation
     for (var prop in input) {
-        if(prop === "")
         product[prop] = input[prop];
     }
     product.save(function (err, prdct) {
@@ -96,7 +95,7 @@ function likeProduct(req, res){
 
         Product.findOneAndUpdate({productId:product.productId},{$addToSet:{likes:user._id}}, function(err, doc){
             if(err) res.json(err, 404);
-            if(!doc) res.json({error:true, message:"cannot like this product", errorObj:err})
+            if(!doc) res.json({error:true, message:"cannot like a product that doesnt exist", errorObj:err})
             return res.json(doc);
         });
     })
