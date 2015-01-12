@@ -26,6 +26,7 @@
     "connect-flash": "~0.1.1",
     "lodash": "~2.4.1",
     "rekuire": "~0.1.9",
-    "mongoose-findorcreate": "~0.1.2"
+    "mongoose-findorcreate": "~0.1.2",
+    "q": "~1.1.2"
   }
 }

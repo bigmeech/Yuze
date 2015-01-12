@@ -3,7 +3,7 @@ var router = express.Router();
 var rek = require("rekuire");
 var _ = require("lodash");
 
-//models
+//DB Object
 var DB = rek('database');
 
 /*
@@ -15,8 +15,7 @@ var DB = rek('database');
  * Create - post request to /user/create
  * delete - delete request to /user/remove/<userId>
  *
- *
- *     Todo:Need to find a way to make this CRUD more centralised, so i dont have to reinvewnt this wheel for every route/controller
+ * Todo:Need to find a way to make this CRUD more centralised, so i dont have to reinvewnt this wheel for every route/controller
  *
  * */
 
