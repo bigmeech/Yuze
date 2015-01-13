@@ -3,7 +3,7 @@ var mongoose = require("mongoose"),
     autoIncrement = require("mongoose-auto-increment"),
     config = require("../config");
 
-mongoose.connect('mongodb://localhost/'+config.database.name);
+mongoose.connect('mongodb://localhost/'+config.database['development'].name);
 var db = mongoose.connection;
 db.on("error",function(errMsg){
     console.log("Error Connecting to Mongo: "+errMsg);
