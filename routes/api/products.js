@@ -93,11 +93,15 @@ function likeProduct(req, res){
         var product = result[0],
             user    = result[1];
 
-        Product.findOneAndUpdate({productId:product.productId},{$addToSet:{likes:user._id}}, function(err, doc){
-            if(err) res.json(err, 404);
-            if(!doc) res.json({error:true, message:"cannot like a product that doesnt exist", errorObj:err})
-            return res.json(doc);
-        });
+        if(user){
+            Product.findOneAndUpdate({productId:product.productId},{$addToSet:{likes:user._id}}, function(err, doc){
+                if(err) res.json(err, 404);
+                if(!doc) res.json({error:true, message:"cannot like a product that doesnt exist", errorObj:err})
+                return res.json(doc);
+            });
+        }else{
+            res.json({error:true, message:"not a user, please sign up"})
+        }
     })
 
 }
