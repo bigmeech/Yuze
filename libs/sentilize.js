@@ -41,10 +41,11 @@ function Sentometer(phrase, callback){
                         if(afinn.score < 0) neg += Number(afinn.score);}
                 })
             });
-            callback({matchedWords:matches, postive:pos, negative:neg});
+            callback({ matchedWords:matches, postive:pos, negative:neg });
         })
 }
 
+//Todo: Complete this add Feature later
 Sentometer.prototype.add = function(word, score){
     console.log(word, score, "- added!")
 }
