@@ -4,6 +4,8 @@ var rekuire = require("rekuire")
     Schema = mongoose.Schema,
     ObjectID = Schema.Types.ObjectId;
 
+//TODO: Add a description field
+//TODO: Add a current Sentiment field (Run through all comments and figure that out)
 var Product = new Schema({
     productId:Number,
     creator:{type:ObjectID, ref:'User'},
