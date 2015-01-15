@@ -1,6 +1,6 @@
 {
   "name": "Yuze",
-  "version": "0.0.0",
+  "version": "0.0.0-1",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -28,5 +28,9 @@
     "rekuire": "~0.1.9",
     "mongoose-findorcreate": "~0.1.2",
     "q": "~1.1.2"
+  },
+  "subdomain": "yuze",
+  "engines": {
+    "node": "0.10.x"
   }
 }
