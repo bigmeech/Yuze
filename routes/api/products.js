@@ -40,14 +40,15 @@ function deleteProduct(req, res){
 }
 
 function editProduct(req, res){
-    res.send('respond with a resource');
+    var input  = req.params;
+    data = _.omit(req.body, ['email', 'facebookId']); //omit all unique fields
+
+    var Product = DB.model('Product');
 }
 
 function createProduct(req, res){
 
     var input = req.body;
-
-    var Product = DB.model("Product");
 
     //get model
     var Product = DB.model('Product');
