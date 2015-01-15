@@ -15,7 +15,7 @@ var DB = rek('database');
 
 router.get('/product/show/:id', showProduct);
 router.put('/product/edit/:id', editProduct);
-router.post('/product/create', createProduct);
+router.post('/product/create/:userId', createProduct);
 router.delete('/product/remove/:id', deleteProduct);
 
 /*
@@ -52,16 +52,30 @@ function createProduct(req, res){
 
     //get model
     var Product = DB.model('Product');
-    var product = new Product();
+    var User = DB.model('User');
 
-    //do operation
-    for (var prop in input) {
-        product[prop] = input[prop];
-    }
-    product.save(function (err, prdct) {
-        if (err) return res.json(err, 404);
-        return res.json(prdct);
+    User.findOne({userId:req.params.userId}, function(err, User){
+
+        //checks that all is good
+        if(err) return res.json(err, 404);
+        if(!User) return res.json({error:true, message:"Non Users cannot create product, signin or signup"}, 404);
+
+
+        var product = new Product();
+
+        //add creator id to input
+        input.creator = User._id;
+
+        //do operation
+        for (var prop in input) {
+            product[prop] = input[prop];
+        }
+        product.save(function (err, prdct) {
+            if (err) return res.json(err, 404);
+            return res.json(prdct);
+        })
     })
+
 
 }
 
