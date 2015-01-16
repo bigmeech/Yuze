@@ -88,14 +88,14 @@ function editUsers(req, res) {
     User.findOne({userId: input.id}, function(err, doc){
         //do necerassry check and respond with appropirate message
         if(err) return res.json(err, 404);
-        if(!user) return res.json({error: true, details: "No such user "+input.id, errorObj: err}, 404);
+        if(!doc) return res.json({error: true, details: "No such user "+input.id, errorObj: err}, 404);
 
         var user = doc.toObject();
         for (var prop in user) {
             user[prop] = data[prop]
         }
 
-        user.save(function (err, userData) {
+        doc.save(function (err, userData) {
             if (err) return res.json(err, 404);
             return res.json(userData);
         })

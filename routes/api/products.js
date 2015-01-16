@@ -35,15 +35,40 @@ function showProduct(req, res) {
     res.send('respond with a resource');
 };
 
-function deleteProduct(req, res) {
-    res.send('respond with a resource');
-}
 
-function editProduct(req, res) {
+
+function deleteProduct(req, res) {
     var input = req.params;
-    data = _.omit(req.body, ['email', 'facebookId']); //omit all unique fields
 
     var Product = DB.model('Product');
+    //Operation
+    Product.findOneAndRemove({productId: req.params.id}, function(err, doc){
+        //do necessary check and respond with appropirate message
+        if(err) return res.json(err, 404);
+        if(!doc) return res.json({error: true, details: "No such Product "+input.id, errorObj: err}, 404);
+        return res.json({error:false, message:"Product " + doc.toObject().productId + " removed successfully", flash:true});
+    });
+}
+
+/*
+*
+*Put - host/product/edit/:productId
+*
+*
+* */
+function editProduct(req, res) {
+    var input = req.params;
+    data = _.omit(req.body, ['barcode']); //omit all unique fields
+
+    var Product = DB.model('Product');
+    //Operation
+    Product.findOneAndUpdate({productId: req.params.id}, data, function(err, doc){
+        //do necessary check and respond with appropirate message
+        if(err) return res.json(err, 404);
+        if(!doc) return res.json({error: true, details: "No such Product "+input.id, errorObj: err}, 404);
+        return res.json(doc.toObject());
+    });
+
 }
 
 function createProduct(req, res) {
