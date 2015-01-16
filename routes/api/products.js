@@ -3,6 +3,8 @@ var router = express.Router();
 var rek = require("rekuire");
 var _ = require("lodash");
 var Q = require("q");
+var multer = require("multer");
+var app = rek('app');
 
 //DB Object
 var DB = rek('database');
@@ -25,6 +27,7 @@ router.delete('/product/remove/:id', deleteProduct);
  * */
 
 router.put('/product/:productId/like/:userId', likeProduct);
+router.post('/product/:productId/images/', handleImageUpload)
 
 /*
  *
@@ -171,5 +174,19 @@ function likeProduct(req, res) {
         })
 }
 
+//TODO: find a better way to handle upload during request
+function handleImageUpload(req, res){
+    //handle fileupload metadata
+}
+
+app.use(multer({
+    dest:"./uploads",
+    onFileUploadStart:function(file){
+        console.log("FileUpload Started");
+    },
+    onFileUploadComplete:function(file){
+        console.log("fileupload Complete");
+    }
+}));
 
 module.exports = router;
