@@ -20,31 +20,79 @@ router.delete('/product/remove/:id', deleteProduct);
 
 /*
  *
- * Non restful routes
+ * Non-CRUD route definitions
  *
  * */
-
 
 router.put('/product/:productId/like/:userId', likeProduct);
 
 /*
  *
+ * Read Operation
  * Route functions
+ *
  * */
+
 function showProduct(req, res) {
-    res.send('respond with a resource');
+    var input = req.params;
+
+    var Product = DB.model("Product");
+
+    Product.findOne({productId:input.id}, function(err, doc){
+        if(err) return res.json(err);
+        if(!doc) return res.json({error:true, message:"No Such product found"}, 404);
+        return res.json(doc);
+    })
 };
 
-function deleteProduct(req, res) {
-    res.send('respond with a resource');
-}
+/*
+*
+* Delete Operation
+*
+*
+*
+* */
 
-function editProduct(req, res) {
+function deleteProduct(req, res) {
     var input = req.params;
-    data = _.omit(req.body, ['email', 'facebookId']); //omit all unique fields
 
     var Product = DB.model('Product');
+    //Operation
+    Product.findOneAndRemove({productId: req.params.id}, function(err, doc){
+        //do necessary check and respond with appropirate message
+        if(err) return res.json(err, 404);
+        if(!doc) return res.json({error: true, details: "No such Product "+input.id, errorObj: err}, 404);
+        return res.json({error:false, message:"Product " + doc.toObject().productId + " removed successfully", flash:true});
+    });
 }
+
+/*
+*
+* Edit Operation
+* Put - host/product/edit/:id
+*
+* */
+
+ function editProduct(req, res) {
+    var input = req.params;
+    data = _.omit(req.body, ['barcode']); //omit all unique fields
+
+    var Product = DB.model('Product');
+    //Operation
+    Product.findOneAndUpdate({productId: req.params.id}, data, function(err, doc){
+        //do necessary check and respond with appropirate message
+        if(err) return res.json(err, 404);
+        if(!doc) return res.json({error: true, details: "No such Product "+input.id, errorObj: err}, 404);
+        return res.json(doc.toObject());
+    });
+
+}
+
+/*
+*
+*  Create Operation
+*
+* */
 
 function createProduct(req, res) {
 
@@ -121,7 +169,6 @@ function likeProduct(req, res) {
                 return res.json({error: true, message: "not a user, please sign up"})
             }
         })
-
 }
 
 
