@@ -20,22 +20,38 @@ router.delete('/product/remove/:id', deleteProduct);
 
 /*
  *
- * Non restful routes
+ * Non-CRUD route definitions
  *
  * */
-
 
 router.put('/product/:productId/like/:userId', likeProduct);
 
 /*
  *
+ * Read Operation
  * Route functions
+ *
  * */
+
 function showProduct(req, res) {
-    res.send('respond with a resource');
+    var input = req.params;
+
+    var Product = DB.model("Product");
+
+    Product.findOne({productId:input.id}, function(err, doc){
+        if(err) return res.json(err);
+        if(!doc) return res.json({error:true, message:"No Such product found"}, 404);
+        return res.json(doc);
+    })
 };
 
-
+/*
+*
+* Delete Operation
+*
+*
+*
+* */
 
 function deleteProduct(req, res) {
     var input = req.params;
@@ -52,11 +68,12 @@ function deleteProduct(req, res) {
 
 /*
 *
-*Put - host/product/edit/:productId
-*
+* Edit Operation
+* Put - host/product/edit/:id
 *
 * */
-function editProduct(req, res) {
+
+ function editProduct(req, res) {
     var input = req.params;
     data = _.omit(req.body, ['barcode']); //omit all unique fields
 
@@ -70,6 +87,12 @@ function editProduct(req, res) {
     });
 
 }
+
+/*
+*
+*  Create Operation
+*
+* */
 
 function createProduct(req, res) {
 
@@ -146,7 +169,6 @@ function likeProduct(req, res) {
                 return res.json({error: true, message: "not a user, please sign up"})
             }
         })
-
 }
 
 
