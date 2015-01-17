@@ -1,12 +1,17 @@
 var mongoose = require("mongoose"),
     mongooseTimestamps = require("mongoose-concrete-timestamps"),
     autoIncrement = require("mongoose-auto-increment"),
-    config = require("../config");
+    config = require("../config"),
+    Grid = require("gridfs-stream");
 
 mongoose.connect( config.database['development'].url + "" + config.database['development'].name );
 var db = mongoose.connection;
+db.once('open', function(){
+    var gfs = Grid(db, mongoose.mongo);
+    mongoose.Grid = new mongoose.mongo.Grid(db, 'fs');
+});
 db.on("error",function(errMsg){
-    console.log("Error Connecting to Mongo: "+errMsg);
+    console.log("Error Connecting to Mongo: " + errMsg);
 });
 mongoose.set('debug', true);
 
