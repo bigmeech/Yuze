@@ -8,7 +8,6 @@ var rekuire = require("rekuire")
 //TODO: Add a current Sentiment field (Run through all comments and figure that out)
 var Product = new Schema({
     productId:Number,
-    creator:{type:ObjectID, ref:'User'},
     barcode:Object,
     name:String,
     description:String,

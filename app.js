@@ -8,13 +8,17 @@ var MongoStore = require("connect-mongo")(session);
 var bodyParser = require('body-parser');
 var flash = require("connect-flash");
 var passport = require("passport");
+var multer = require("multer");
+
 
 //libs
 var mongoose = require("./libs/database");
 var loader = require("./libs/loader");
 var auth = require("./libs/authentication");
 
-var app = express();
+//circular reference
+var app = module.exports = express();
+
 var sessionStore;
 mongoose.connection.once("open", function(err){
     if(err) throw err
@@ -39,5 +43,3 @@ loader(app);
 
 //do authentication bits
 auth(app);
-
-module.exports = app;
