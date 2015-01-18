@@ -189,14 +189,37 @@ function likeProduct(req, res) {
 
 //TODO: find a better way to handle upload during request
 function uploadDone(file) {
-    var Grid = DB.gfs;
-    var MongoGrid = DB.Grid;
     var options = {
+        name:file.name,
+        mode:"w+",
+        content_type:file.mimetype,
+        w: "majority",
+        chunkSize: 1024,
+        metadata:file
+    };
+
+    var gridStore = new DB.GridStore(DB.connection, new ObjectId(), file.name, "w+", options);
+    gridStore.open(function(err, GS){
+
+        console.log("GridStore Opened");
+        if(err) throw err;
+
+        GS.write(file.buffer, function(err, GS){
+
+            console.log("file written");
+            if(err) throw err
+            GS.close(function(err, result){
+                if(err) throw err
+                console.log(result);
+            })
+
+        })
+    });
+    /*var options = {
         _id:new ObjectId(),
         name:file.name,
         mode:"w+",
         content_type:file.mimetype,
-        root: 'product_image',
         w: "majority",
         chunkSize: 1024,
         metadata:file
@@ -205,7 +228,7 @@ function uploadDone(file) {
     MongoGrid.put(file.buffer, options, function(err, fileinfo){
         if(err) throw err;
         console.log(fileinfo);
-    });
+    });*/
 
     /*//get writable stream from grid
     var GridWriteStream = Grid.createWriteStream(options);

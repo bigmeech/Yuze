@@ -8,7 +8,7 @@ mongoose.connect( config.database['development'].url + "" + config.database['dev
 var db = mongoose.connection;
 db.once('open', function(){
     var gfs = Grid(db, mongoose.mongo);
-    mongoose.Grid = new mongoose.mongo.Grid(db, 'fs');
+    mongoose.GridStore = mongoose.mongo.GridStore
 });
 db.on("error",function(errMsg){
     console.log("Error Connecting to Mongo: " + errMsg);
