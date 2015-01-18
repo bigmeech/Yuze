@@ -3,9 +3,16 @@ var router = express.Router();
 var rek = require("rekuire");
 var _ = require("lodash");
 var Q = require("q");
+var app = rek('app');
+var multer = require("multer");
+var fs = require("fs");
+
 
 //DB Object
 var DB = rek('database');
+var ObjectId = DB.Schema.Types.ObjectId;
+var UploadManager = rek("uploadManager");
+var uploadOptions = {inMemory:true, onFileUploadComplete: uploadDone}
 
 /*
  *
@@ -25,6 +32,7 @@ router.delete('/product/remove/:id', deleteProduct);
  * */
 
 router.put('/product/:productId/like/:userId', likeProduct);
+router.post('/product/:productId/images/', multer(uploadOptions), uploadImageResponse);
 
 /*
  *
@@ -38,61 +46,65 @@ function showProduct(req, res) {
 
     var Product = DB.model("Product");
 
-    Product.findOne({productId:input.id}, function(err, doc){
-        if(err) return res.json(err);
-        if(!doc) return res.json({error:true, message:"No Such product found"}, 404);
+    Product.findOne({productId: input.id}, function (err, doc) {
+        if (err) return res.json(err);
+        if (!doc) return res.json({error: true, message: "No Such product found"}, 404);
         return res.json(doc);
     })
 };
 
 /*
-*
-* Delete Operation
-*
-*
-*
-* */
+ *
+ * Delete Operation
+ *
+ *
+ *
+ * */
 
 function deleteProduct(req, res) {
     var input = req.params;
 
     var Product = DB.model('Product');
     //Operation
-    Product.findOneAndRemove({productId: req.params.id}, function(err, doc){
+    Product.findOneAndRemove({productId: req.params.id}, function (err, doc) {
         //do necessary check and respond with appropirate message
-        if(err) return res.json(err, 404);
-        if(!doc) return res.json({error: true, details: "No such Product "+input.id, errorObj: err}, 404);
-        return res.json({error:false, message:"Product " + doc.toObject().productId + " removed successfully", flash:true});
+        if (err) return res.json(err, 404);
+        if (!doc) return res.json({error: true, details: "No such Product " + input.id, errorObj: err}, 404);
+        return res.json({
+            error: false,
+            message: "Product " + doc.toObject().productId + " removed successfully",
+            flash: true
+        });
     });
 }
 
 /*
-*
-* Edit Operation
-* Put - host/product/edit/:id
-*
-* */
+ *
+ * Edit Operation
+ * Put - host/product/edit/:id
+ *
+ * */
 
- function editProduct(req, res) {
+function editProduct(req, res) {
     var input = req.params;
     data = _.omit(req.body, ['barcode']); //omit all unique fields
 
     var Product = DB.model('Product');
     //Operation
-    Product.findOneAndUpdate({productId: req.params.id}, data, function(err, doc){
+    Product.findOneAndUpdate({productId: req.params.id}, data, function (err, doc) {
         //do necessary check and respond with appropirate message
-        if(err) return res.json(err, 404);
-        if(!doc) return res.json({error: true, details: "No such Product "+input.id, errorObj: err}, 404);
+        if (err) return res.json(err, 404);
+        if (!doc) return res.json({error: true, details: "No such Product " + input.id, errorObj: err}, 404);
         return res.json(doc.toObject());
     });
 
 }
 
 /*
-*
-*  Create Operation
-*
-* */
+ *
+ *  Create Operation
+ *
+ * */
 
 function createProduct(req, res) {
 
@@ -157,12 +169,16 @@ function likeProduct(req, res) {
             var product = result[0],
                 user = result[1];
 
-            if(!user) return res.json({error: true, message: "not a user, please sign up/sign in"});
-            if(!product) return res.json({error: true, message: "cannot like a non-existing product"});
+            if (!user) return res.json({error: true, message: "not a user, please sign up/sign in"});
+            if (!product) return res.json({error: true, message: "cannot like a non-existing product"});
             if (user && product) {
                 Product.findOneAndUpdate({productId: product.productId}, {$addToSet: {likes: user._id}}, function (err, doc) {
                     if (err) res.json(err, 404);
-                    if (!doc) res.json({error: true, message: "could not like this product for some unknown reason", errorObj: err})
+                    if (!doc) res.json({
+                        error: true,
+                        message: "could not like this product for some unknown reason",
+                        errorObj: err
+                    })
                     return res.json(doc);
                 });
             } else {
@@ -171,5 +187,65 @@ function likeProduct(req, res) {
         })
 }
 
+//TODO: find a better way to handle upload during request
+function uploadDone(file) {
+    var options = {
+        name:file.name,
+        mode:"w+",
+        content_type:file.mimetype,
+        w: "majority",
+        chunkSize: 1024,
+        metadata:file
+    };
+
+    var gridStore = new DB.GridStore(DB.connection, new ObjectId(), file.name, "w+", options);
+    gridStore.open(function(err, GS){
+
+        console.log("GridStore Opened");
+        if(err) throw err;
+
+        GS.write(file.buffer, function(err, GS){
+
+            console.log("file written");
+            if(err) throw err
+            GS.close(function(err, result){
+                if(err) throw err
+                console.log(result);
+            })
+
+        })
+    });
+    /*var options = {
+        _id:new ObjectId(),
+        name:file.name,
+        mode:"w+",
+        content_type:file.mimetype,
+        w: "majority",
+        chunkSize: 1024,
+        metadata:file
+    };
+
+    MongoGrid.put(file.buffer, options, function(err, fileinfo){
+        if(err) throw err;
+        console.log(fileinfo);
+    });*/
+
+    /*//get writable stream from grid
+    var GridWriteStream = Grid.createWriteStream(options);
+    var fsReader = fs.createReadStream(file.path);
+    fsReader.pipe(GridWriteStream)
+    fsReader.on("close", function (data) {
+        fs.unlink(file.path, function(err){
+            if(err) throw err
+            console.log("file deleted after storage on gridFS");
+        })
+    });*/
+}
+
+function uploadImageResponse(req, res) {
+    res.json({message: "whatever"});
+}
+
+//app.use();
 
 module.exports = router;
