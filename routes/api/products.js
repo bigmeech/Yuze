@@ -7,12 +7,12 @@ var app = rek('app');
 var multer = require("multer");
 var fs = require("fs");
 
-
 //DB Object
 var DB = rek('database');
+
 var ObjectId = DB.Schema.Types.ObjectId;
 var UploadManager = rek("uploadManager");
-var uploadOptions = {inMemory:true, onFileUploadComplete: uploadDone}
+var uploadOptions = {inMemory:true, onFileUploadComplete: UploadManager};
 
 /*
  *
@@ -194,52 +194,22 @@ function uploadDone(file) {
         mode:"w+",
         content_type:file.mimetype,
         w: "majority",
-        chunkSize: 1024,
         metadata:file
     };
 
-    var gridStore = new DB.GridStore(DB.connection, new ObjectId(), file.name, "w+", options);
-    gridStore.open(function(err, GS){
-
-        console.log("GridStore Opened");
+    var GridStore = new DB.GridStore(DB.connection, file.name, "w+", options);
+    GridStore.open(function(err, GSStream){
         if(err) throw err;
-
-        GS.write(file.buffer, function(err, GS){
-
+        return GSStream.write(file.buffer, function(err, fileStream){
             console.log("file written");
-            if(err) throw err
-            GS.close(function(err, result){
+            if(err) throw err;
+            fileStream.close(function(err, result){
                 if(err) throw err
                 console.log(result);
             })
 
         })
     });
-    /*var options = {
-        _id:new ObjectId(),
-        name:file.name,
-        mode:"w+",
-        content_type:file.mimetype,
-        w: "majority",
-        chunkSize: 1024,
-        metadata:file
-    };
-
-    MongoGrid.put(file.buffer, options, function(err, fileinfo){
-        if(err) throw err;
-        console.log(fileinfo);
-    });*/
-
-    /*//get writable stream from grid
-    var GridWriteStream = Grid.createWriteStream(options);
-    var fsReader = fs.createReadStream(file.path);
-    fsReader.pipe(GridWriteStream)
-    fsReader.on("close", function (data) {
-        fs.unlink(file.path, function(err){
-            if(err) throw err
-            console.log("file deleted after storage on gridFS");
-        })
-    });*/
 }
 
 function uploadImageResponse(req, res) {
