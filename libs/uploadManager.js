@@ -4,24 +4,22 @@ var rek = require("rekuire");
 var aws = require("aws-sdk");
 var config = rek("config");
 
-//var onUploadDone = ;
-
 function UploadManager(file){
 
-    //make api keys for you account known.
     aws.config.update({
         accessKeyId:config.aws['development'].accesskeyid,
         secretAccessKey:config.aws['development'].secretaccesskey
     });
 
-    var s3_params = {
+    var params = {
         Bucket:config.aws['development'].bucket,
-        ACL:'public-read'
+        ACL:'public-read',
+        Body:file.buffer,
+        Key:file.name
     };
     var S3 = new aws.S3();
-    s3_params.Key = file.originalname;
-    S3.getSignedUrl('putObject', s3_params, function(err, data){
-        console.log(err, data);
+    S3.putObject(params, function(err, data){
+        console.log(err, data, "file uploaded");
     });
 }
 
