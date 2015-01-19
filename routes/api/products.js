@@ -188,7 +188,7 @@ function likeProduct(req, res) {
 }
 
 //TODO: find a better way to handle upload during request
-function uploadDone(file) {
+/*function uploadDone(file) {
     var options = {
         name:file.name,
         mode:"w+",
@@ -210,9 +210,17 @@ function uploadDone(file) {
 
         })
     });
-}
+}*/
 
+
+//TODO use the request object's files to access the file name uysed as key during storage to AWS
 function uploadImageResponse(req, res) {
+    var input = req.params;
+
+    var Product = DB.model('Product');
+    Product.findOne({productId:input.productId}, function(err, product){
+        console.log(product);
+    })
     res.json({message: "whatever"});
 }
 
