@@ -1,5 +1,10 @@
 var express = require('express');
 var router = express.Router();
+var rek = require("rekuire");
+var _ = require("lodash");
+
+//DB Object
+var DB = rek('database');
 
 /*
  *
