@@ -12,6 +12,7 @@ var Product = new Schema({
     name:String,
     description:String,
     sentiment:Number,
+    awsurl:String,
     creator:{type:ObjectID, ref:'User'},
     likes:[{type:ObjectID, ref:'User'}], //should juist be an array of users. Note you are either on this list or on the dislikes list
     dislikes:[{type:ObjectID, ref:'User'}], //should just be an array of users. Note you are either on this list or on the likes list
