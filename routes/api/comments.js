@@ -14,7 +14,7 @@ var DB = rek('database');
 
 router.get('/comments/show/:productId', showComments);
 router.put('/comments/edit/:id', editComments);
-router.post('/comments/create', createComments);
+router.post('/comments/:userId/create/:productId', createComments);
 router.delete('/comments/remove/:id', deleteComments);
 
 
@@ -33,7 +33,7 @@ function showComments(req, res){
     // die with a 404
     Product.findOne({productId:input.productId}, function(err, data){
         if(err) return res.json(err, 404);
-        if(!data) return res.json({error:true, message:"Illegal Attempt to comment on a product that does NOT exist"});
+        if(!data) return res.json({error:true, message:"Cant get comments for a product that does NOT exist"});
         if(data){
             Comment.find({productId:data.productId}, function(err, data){
                 if(err) return res.json(err, 404);
@@ -59,8 +59,35 @@ function editComments(req, res){
     res.send('respond with a resource');
 }
 
-function createComments(req, res){
-    res.send('respond with a resource');
+function createComments(req, res) {
+    var input = req.params;
+    var body = req.body;
+
+
+    var Comment = DB.model("Comment");
+    var Product = DB.model("Product");
+
+    //first attempt to find the product and proceed with the comment operation else
+    // die with a 404
+    Product.findOne({productId: input.productId}, function (err, data) {
+        if (err) return res.json(err, 404);
+        if (!data) return res.json({
+            error: true,
+            message: "Illegal Attempt to comment on a product that does NOT exist"
+        });
+        if (data) {
+            var NewComment = new Comment();
+            NewComment.text = body.text;
+            NewComment.userId = input.userId;
+            NewComment.save(function(err, data){
+                if (err) return res.json(err, 404);
+                if (data.length <= 0) return res.json({error: false, message: "Could not find comment"});
+                return res.json(data);
+            });
+        }
+
+    })
+
 }
 
 
