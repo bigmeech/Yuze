@@ -7,10 +7,11 @@ var rekuire = require("rekuire")
 var Comment = new Schema({
     commentId:Number,
     userId:{type:String, ref:'User'},
+    productId:{type:Number, ref:'Product'},
     upVotes:Number,
     downVotes:Number,
     text:String
 });
 
-Comment.plugin(autoIncrement.plugin,{model:'Comment',field:'ProductImageId',startAt:1000});
+Comment.plugin(autoIncrement.plugin,{model:'Comment',field:'commentId',startAt:1000});
 module.exports = mongoose.model('Comment', Comment);
