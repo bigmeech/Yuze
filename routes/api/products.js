@@ -3,9 +3,9 @@ var router = express.Router();
 var rek = require("rekuire");
 var _ = require("lodash");
 var Q = require("q");
-var app = rek('app');
+var config = rek('config');
 var multer = require("multer");
-var fs = require("fs");
+var commonFn = rek("common");
 
 //DB Object
 var DB = rek('database');
@@ -213,17 +213,20 @@ function likeProduct(req, res) {
 }*/
 
 
-//TODO use the request object's files to access the file name uysed as key during storage to AWS
+//here we are assuming the upload was successful and
 function uploadImageResponse(req, res) {
     var input = req.params;
-
+    var file = req.files.productImage;
+    var awsUrl = commonFn.getAWSUrl(file.name);
     var Product = DB.model('Product');
-    Product.findOne({productId:input.productId}, function(err, product){
-        console.log(product);
-    })
-    res.json({message: "whatever"});
+
+    Product.findOneAndUpdate({productId:input.productId},{awsurl:awsUrl}, function(err, newData){
+        if(err) return res.json(err,404);
+        return res.json(newData);
+    });
+
 }
 
-//app.use();
+//helpers
 
 module.exports = router;
