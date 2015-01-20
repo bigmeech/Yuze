@@ -61,10 +61,23 @@ function editComments(req, res) {
     res.send('respond with a resource');
 }
 
-function uvComments(req, res) {
+/*
+ *
+ * Up Vote Comment Operation - Works by just adding the user id to the Upvote list
+ * i.e number of Upvotes is just a count of the number of users in the Upvotes array
+ *
+ * */
+
+ function uvComments(req, res) {
     res.send('respond with a resource');
 }
 
+/*
+*
+* Down Vote Comment Operation - Works by just adding the user id to the Down votes list
+* i.e number of Down votes is just a count of the number of users in the Down votes array
+*
+* */
 function dvComments(req, res) {
     res.send('respond with a resource');
 }
