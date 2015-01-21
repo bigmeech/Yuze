@@ -92,7 +92,7 @@ function editComments(req, res) {
  *
  * Up Vote Comment Operation - Works by just adding the user id to the Upvote list
  * i.e number of Upvotes is just a count of the number of users in the Upvotes array
- *
+ * TODO: make sure users who exist in this list do not exist on the on the dv list
  * */
 
  function uvComments(req, res) {
@@ -123,7 +123,7 @@ function editComments(req, res) {
 *
 * Down Vote Comment Operation - Works by just adding the user id to the Down votes list
 * i.e number of Down votes is just a count of the number of users in the Down votes array
-*
+* TODO: make sure users who exist in this list do not exist on the on the uv list
 * */
 function dvComments(req, res) {
     //input from client
