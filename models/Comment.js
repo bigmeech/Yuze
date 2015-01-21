@@ -6,7 +6,7 @@ var rekuire = require("rekuire")
 
 var Comment = new Schema({
     commentId:Number,
-    userId:{type:String, ref:'User'},
+    userId:{type:Number, ref:'User'},
     productId:{type:Number, ref:'Product'},
     upVotes:Number,
     downVotes:Number,

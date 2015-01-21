@@ -1,0 +1,1 @@
+{ "indexes" : [ { "v" : 1, "key" : { "_id" : 1 }, "name" : "_id_", "ns" : "yuze.tagmaps" }, { "v" : 1, "unique" : true, "key" : { "tagMapId" : 1 }, "name" : "tagMapId_1", "ns" : "yuze.tagmaps", "background" : true, "safe" : null } ] }

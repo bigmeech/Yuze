@@ -82,6 +82,12 @@ function dvComments(req, res) {
     res.send('respond with a resource');
 }
 
+
+/*
+*
+*
+*
+* */
 function createComments(req, res) {
     var input = req.params;
     var body = req.body;
@@ -101,8 +107,11 @@ function createComments(req, res) {
             });
         if (data) {
             var NewComment = new Comment();
+
             NewComment.text = body.text;
             NewComment.userId = input.userId;
+            NewComment.productId = input.productId;
+
             NewComment.save(function (err, data) {
                 if (err) return res.json(err, 404);
                 if (data.length <= 0)
