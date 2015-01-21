@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var rek = require("rekuire");
 var _ = require("lodash");
+var Q = require("q");
 
 //DB Object
 var DB = rek('database');
@@ -16,8 +17,8 @@ router.get('/comments/show/:productId', showComments);
 router.put('/comments/edit/:id', editComments);
 router.post('/comments/:userId/create/:productId', createComments);
 router.delete('/comments/remove/:id', deleteComments);
-router.put('/comments/upvote/:id', uvComments);
-router.put('/comments/downvote/:id', dvComments);
+router.put('/comments/:id/uv/:userId', uvComments);
+router.put('/comments/:id/dv/:userId', dvComments);
 
 
 /*
@@ -51,14 +52,40 @@ function showComments(req, res) {
 /*
  *
  *  You really cannot delete comments, you can only edit them
+ *  Deleting them will technically make you loose points associated with it but we want you to gain points :)
+ *  poeple can also cheat the system by deleting negative points for bad comments
  *
  * */
 function deleteComments(req, res) {
-    res.send('respond with a resource');
+    //input from client
+    var input = req.params;
+    var body = req.body;
+
+    //models responsible
+    var Comment = DB.model('Comment');
+    var Product = DB.model('Product');
+
 }
 
 function editComments(req, res) {
-    res.send('respond with a resource');
+
+    //input from client
+    var input = req.params;
+    var body = req.body;
+
+    //models responsible
+    var Comment = DB.model('Comment');
+    var Product = DB.model('Product');
+
+    //query
+    var query = {commentId:input.id};
+    Comment.findOneAndUpdate(query, body, function(err, newComment){
+        if(err) return res.json(err, 404);
+        if(!newComment) return res.json({error:true, message:"no such comments found"}, 404);
+        return res.json(newComment.toObject());
+    });
+
+
 }
 
 /*
@@ -69,7 +96,27 @@ function editComments(req, res) {
  * */
 
  function uvComments(req, res) {
-    res.send('respond with a resource');
+     //input from client
+     var input = req.params;
+     var body = req.body;
+
+     //models responsible
+     var Comment = DB.model('Comment');
+     var Product = DB.model('Product');
+     var User = DB.model('User');
+
+     //queries
+     var userQuery = {userId:input.userId};
+     var commentQuery = {id:input.id};
+     User.findOne(userQuery, function(err, User){
+         if(err) return res.json(err, 500);
+         if(!User) return res.json({error:true, message:"no such user"}, 404)
+         Comment.findOneAndUpdate(commentQuery,{$addToSet: {upVotes: User._id}}, function(err,newComment){
+             if(err) return res.json(err, 500);
+             if(!newComment) return res.json({eror:true, message:"no such comments found"})
+             return res.json(newComment.toObject());
+         })
+     });
 }
 
 /*
@@ -79,7 +126,27 @@ function editComments(req, res) {
 *
 * */
 function dvComments(req, res) {
-    res.send('respond with a resource');
+    //input from client
+    var input = req.params;
+    var body = req.body;
+
+    //models responsible
+    var Comment = DB.model('Comment');
+    var Product = DB.model('Product');
+    var User = DB.model('User');
+
+    //queries
+    var userQuery = {userId:input.userId};
+    var commentQuery = {id:input.id};
+    User.findOne(userQuery, function(err, User){
+        if(err) return res.json(err, 500);
+        if(!User) return res.json({error:true, message:"no such user"}, 404)
+        Comment.findOneAndUpdate(commentQuery,{$addToSet: {downVotes: User._id}}, function(err,newComment){
+            if(err) return res.json(err, 500);
+            if(!newComment) return res.json({eror:true, message:"no such comments found"})
+            return res.json(newComment.toObject());
+        })
+    });
 }
 
 
@@ -106,8 +173,8 @@ function createComments(req, res) {
                 message: "Illegal Attempt to comment on a product that does NOT exist"
             });
         if (data) {
-            var NewComment = new Comment();
 
+            var NewComment = new Comment();
             NewComment.text = body.text;
             NewComment.userId = input.userId;
             NewComment.productId = input.productId;
