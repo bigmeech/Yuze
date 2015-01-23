@@ -37,5 +37,8 @@
   "subdomain": "yuze",
   "engines": {
     "node": "0.10.x"
+  },
+  "devDependencies": {
+    "gulp": "~3.8.10"
   }
 }
