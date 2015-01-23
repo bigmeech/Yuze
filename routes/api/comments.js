@@ -217,27 +217,29 @@ function updateSentiment(product, comment){
 *
 */
 function recomputeSentiment(commentId,newComment){
-    var Comment = DB.model("Comment");
-    var Product = DB.model("Product");
+    var Comment = DB.model('Comment');
+    var Product = DB.model('Product');
 
     var oldcomment = new Comment(),
         oldscore,
-        newscore,
+        newscore
 
-    //Get the productid from the old comment
+    /*Get the productid from the old comment  */
     Comment.findOne({id: commentId}, function(err,comment){
        if(err) return res.json(err,404);
         oldcomment = comment;
+
+        //Get the product so as to get the Sentiment presently stored
+        Product.findOne({productId:oldcomment.productId},function(err,product){
+            if(err) return res.json(err,404);
+
+            if(product){
+                product.sentiment = oldscore;
+            }
+        });
     });
 
-    //Get the product so as to get the Sentiment presently stored
-    Product.findOne({productId:oldcomment.productId},function(err,product){
-        if(err) return res.json(err,404);
 
-        if(product){
-            product.sentiment = oldscore;
-        }
-    });
 
     newscore = oldscore - sentiment(oldcomment);
     newscore += sentiment(newComment);
