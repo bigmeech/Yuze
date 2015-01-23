@@ -3,16 +3,16 @@ var router = express.Router();
 var rek = require("rekuire");
 var _ = require("lodash");
 var Q = require("q");
-var app = rek('app');
+var config = rek('config');
 var multer = require("multer");
-var fs = require("fs");
-
+var commonFn = rek("common");
 
 //DB Object
 var DB = rek('database');
+
 var ObjectId = DB.Schema.Types.ObjectId;
 var UploadManager = rek("uploadManager");
-var uploadOptions = {inMemory:true, onFileUploadComplete: uploadDone}
+var uploadOptions = {inMemory:true, onFileUploadComplete: UploadManager};
 
 /*
  *
@@ -20,10 +20,10 @@ var uploadOptions = {inMemory:true, onFileUploadComplete: uploadDone}
  *
  * */
 
-router.get('/product/show/:id', showProduct);
-router.put('/product/edit/:id', editProduct);
-router.post('/product/create/:userId', createProduct);
-router.delete('/product/remove/:id', deleteProduct);
+router.get('/products/show/:id', showProduct);
+router.put('/products/edit/:id', editProduct);
+router.post('/products/create/:userId', createProduct);
+router.delete('/products/remove/:id', deleteProduct);
 
 /*
  *
@@ -31,8 +31,9 @@ router.delete('/product/remove/:id', deleteProduct);
  *
  * */
 
-router.put('/product/:productId/like/:userId', likeProduct);
-router.post('/product/:productId/images/', multer(uploadOptions), uploadImageResponse);
+router.put('/products/:productId/like/:userId', likeProduct);
+router.put('/products/:productId/follow/:userId', followProduct);
+router.post('/products/:productId/images/', multer(uploadOptions), uploadImageResponse);
 
 /*
  *
@@ -187,65 +188,87 @@ function likeProduct(req, res) {
         })
 }
 
+
+function followProduct(req, res){
+    //get input from client
+    var input = req.params;
+
+    //get model
+    var Product = DB.model('Product');
+    var User = DB.model('User');
+
+
+    //functions to call
+    var getProduct = function (Product) {
+        return Product.findOne({productId: input.productId}).exec()
+    };
+    var getUser = function (User) {
+        return User.findOne({userId: input.userId}).exec();
+    };
+
+    Q.all([getProduct(Product), getUser(User)])
+        .done(function (result) {
+            var product = result[0],
+                user = result[1];
+
+            if (!user) return res.json({error: true, message: "not a user, please sign up/sign in"});
+            if (!product) return res.json({error: true, message: "cannot follow a non-existing product"});
+            if (user && product) {
+                Product.findOneAndUpdate({productId: product.productId}, {$addToSet: {followers: user._id}}, function (err, doc) {
+                    if (err) res.json(err, 404);
+                    if (!doc) res.json({
+                        error: true,
+                        message: "could not follow this product for some unknown reason",
+                        errorObj: err
+                    })
+                    return res.json(doc);
+                });
+            } else {
+                return res.json({error: true, message: "not a user, please sign up"})
+            }
+        })
+}
+
 //TODO: find a better way to handle upload during request
-function uploadDone(file) {
+/*function uploadDone(file) {
     var options = {
         name:file.name,
         mode:"w+",
         content_type:file.mimetype,
         w: "majority",
-        chunkSize: 1024,
         metadata:file
     };
 
-    var gridStore = new DB.GridStore(DB.connection, new ObjectId(), file.name, "w+", options);
-    gridStore.open(function(err, GS){
-
-        console.log("GridStore Opened");
+    var GridStore = new DB.GridStore(DB.connection, file.name, "w+", options);
+    GridStore.open(function(err, GSStream){
         if(err) throw err;
-
-        GS.write(file.buffer, function(err, GS){
-
+        return GSStream.write(file.buffer, function(err, fileStream){
             console.log("file written");
-            if(err) throw err
-            GS.close(function(err, result){
+            if(err) throw err;
+            fileStream.close(function(err, result){
                 if(err) throw err
                 console.log(result);
             })
 
         })
     });
-    /*var options = {
-        _id:new ObjectId(),
-        name:file.name,
-        mode:"w+",
-        content_type:file.mimetype,
-        w: "majority",
-        chunkSize: 1024,
-        metadata:file
-    };
+}*/
 
-    MongoGrid.put(file.buffer, options, function(err, fileinfo){
-        if(err) throw err;
-        console.log(fileinfo);
-    });*/
 
-    /*//get writable stream from grid
-    var GridWriteStream = Grid.createWriteStream(options);
-    var fsReader = fs.createReadStream(file.path);
-    fsReader.pipe(GridWriteStream)
-    fsReader.on("close", function (data) {
-        fs.unlink(file.path, function(err){
-            if(err) throw err
-            console.log("file deleted after storage on gridFS");
-        })
-    });*/
-}
-
+//here we are assuming the upload was successful and
 function uploadImageResponse(req, res) {
-    res.json({message: "whatever"});
+    var input = req.params;
+    var file = req.files.productImage;
+    var awsUrl = commonFn.getAWSUrl(file.name);
+    var Product = DB.model('Product');
+
+    Product.findOneAndUpdate({productId:input.productId},{awsurl:awsUrl}, function(err, newData){
+        if(err) return res.json(err,404);
+        return res.json(newData);
+    });
+
 }
 
-//app.use();
+//helpers
 
 module.exports = router;

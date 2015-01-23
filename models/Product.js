@@ -12,6 +12,7 @@ var Product = new Schema({
     name:String,
     description:String,
     sentiment:Number,
+    awsurl:String,
     creator:{type:ObjectID, ref:'User'},
     likes:[{type:ObjectID, ref:'User'}], //should juist be an array of users. Note you are either on this list or on the dislikes list
     dislikes:[{type:ObjectID, ref:'User'}], //should just be an array of users. Note you are either on this list or on the likes list
@@ -32,5 +33,22 @@ var ProductModel = mongoose.model('Product', Product);
 ProductModel.schema.path('name').validate(function(value){
     if(!value || value === "") return false
 }, 'This field is required');
+
+
+Product.post('save', function (doc) {
+    var User = mongoose.model('User');
+    var ProductModel = mongoose.model('Product');
+    User.findOne({_id:doc.creator}, function(err, user){
+        if(err) throw err;
+        ProductModel.findOneAndUpdate({productId:doc.productId},{$addToSet:{followers:user._id}}, function(err, product){
+            if(err) return err;
+            return product;
+        })
+    });/*
+    Product.findOneAndUpdate({productId:doc.productId},{$addToSet:{followers:doc._id}}, function(err, product){
+        if(err) return err;
+        return;
+    })*/
+});
 
 module.exports = ProductModel;

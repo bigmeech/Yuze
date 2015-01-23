@@ -22,6 +22,7 @@ var app = module.exports = express();
 var sessionStore;
 mongoose.connection.once("open", function(err){
     if(err) throw err
+    mongoose.GridStore = mongoose.mongo.GridStore
     sessionStore = new MongoStore({mongoose_connection:mongoose.connection});
 });
 

@@ -92,7 +92,7 @@ function editUsers(req, res) {
 
         var user = doc.toObject();
         for (var prop in user) {
-            user[prop] = data[prop]
+            doc[prop] = data[prop]
         }
 
         doc.save(function (err, userData) {
