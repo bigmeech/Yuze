@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var rek = require("rekuire");
 var _ = require("lodash");
+var sentiment = require('sentiment');
 var Q = require("q");
 
 //DB Object
@@ -85,7 +86,7 @@ function editComments(req, res) {
         return res.json(newComment.toObject());
     });
 
-
+    recomputeSentiment();
 }
 
 /*
@@ -185,11 +186,40 @@ function createComments(req, res) {
                     return res.json({error: false, message: "Could not find comment"});
                 return res.json(data);
             });
+
+            updateSentiment(data, body);
         }
 
     })
 
 }
+
+/*
+ *
+ *
+ *
+ * */
+function updateSentiment(product, comment){
+    var score =  sentiment(comment);
+
+    var Product = DB.model("Product");
+    score += product.sentiment;
+
+    var query = {productId:product.productId};
+    var update = {sentiment:score};
+    Product.findOneAndUpdate(query,update,function(err,product){
+        if(err) return res.json(err, 404);
+    });
+}
+
+/*
+*
+*/
+function recomputeSentiment(productId,oldComment,newComment){
+
+}
+
+
 
 
 module.exports = router;
