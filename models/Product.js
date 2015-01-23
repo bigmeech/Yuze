@@ -34,4 +34,21 @@ ProductModel.schema.path('name').validate(function(value){
     if(!value || value === "") return false
 }, 'This field is required');
 
+
+Product.post('save', function (doc) {
+    var User = mongoose.model('User');
+    var ProductModel = mongoose.model('Product');
+    User.findOne({_id:doc.creator}, function(err, user){
+        if(err) throw err;
+        ProductModel.findOneAndUpdate({productId:doc.productId},{$addToSet:{followers:user._id}}, function(err, product){
+            if(err) return err;
+            return product;
+        })
+    });/*
+    Product.findOneAndUpdate({productId:doc.productId},{$addToSet:{followers:doc._id}}, function(err, product){
+        if(err) return err;
+        return;
+    })*/
+});
+
 module.exports = ProductModel;

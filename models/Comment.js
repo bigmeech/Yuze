@@ -27,8 +27,7 @@ Comment.plugin(autoIncrement.plugin, {model: 'Comment', field: 'id', startAt: 10
 
 
 Comment.post('save', function (doc) {
-
-    //we brough this here to avoid the pesky schema hasnt been registerd for "XXXX" error
+    //we brought this here to avoid the pesky schema hasnt been registerd for "XXXX" error
     Product = mongoose.model('Product');
     Product.findOneAndUpdate({productId:doc.productId},{$addToSet:{comments:doc._id}}, function(err, product){
         if(err) return err;
