@@ -20,10 +20,10 @@ var uploadOptions = {inMemory:true, onFileUploadComplete: UploadManager};
  *
  * */
 
-router.get('/product/show/:id', showProduct);
-router.put('/product/edit/:id', editProduct);
-router.post('/product/create/:userId', createProduct);
-router.delete('/product/remove/:id', deleteProduct);
+router.get('/products/show/:id', showProduct);
+router.put('/products/edit/:id', editProduct);
+router.post('/products/create/:userId', createProduct);
+router.delete('/products/remove/:id', deleteProduct);
 
 /*
  *
@@ -31,8 +31,9 @@ router.delete('/product/remove/:id', deleteProduct);
  *
  * */
 
-router.put('/product/:productId/like/:userId', likeProduct);
-router.post('/product/:productId/images/', multer(uploadOptions), uploadImageResponse);
+router.put('/products/:productId/like/:userId', likeProduct);
+router.put('/products/:productId/follow/:userId', followProduct);
+router.post('/products/:productId/images/', multer(uploadOptions), uploadImageResponse);
 
 /*
  *
@@ -177,6 +178,47 @@ function likeProduct(req, res) {
                     if (!doc) res.json({
                         error: true,
                         message: "could not like this product for some unknown reason",
+                        errorObj: err
+                    })
+                    return res.json(doc);
+                });
+            } else {
+                return res.json({error: true, message: "not a user, please sign up"})
+            }
+        })
+}
+
+
+function followProduct(req, res){
+    //get input from client
+    var input = req.params;
+
+    //get model
+    var Product = DB.model('Product');
+    var User = DB.model('User');
+
+
+    //functions to call
+    var getProduct = function (Product) {
+        return Product.findOne({productId: input.productId}).exec()
+    };
+    var getUser = function (User) {
+        return User.findOne({userId: input.userId}).exec();
+    };
+
+    Q.all([getProduct(Product), getUser(User)])
+        .done(function (result) {
+            var product = result[0],
+                user = result[1];
+
+            if (!user) return res.json({error: true, message: "not a user, please sign up/sign in"});
+            if (!product) return res.json({error: true, message: "cannot follow a non-existing product"});
+            if (user && product) {
+                Product.findOneAndUpdate({productId: product.productId}, {$addToSet: {followers: user._id}}, function (err, doc) {
+                    if (err) res.json(err, 404);
+                    if (!doc) res.json({
+                        error: true,
+                        message: "could not follow this product for some unknown reason",
                         errorObj: err
                     })
                     return res.json(doc);
