@@ -15,7 +15,7 @@ module.exports = function (app, passport) {
     /*
      *
      * facebook strategy definition
-     *
+     * TODO: Serialize/Deserialize user into session to complete
      * */
 
     passport.use(new FacebookStrategy({
@@ -30,6 +30,13 @@ module.exports = function (app, passport) {
     app.get(
         '/auth/facebook',
         passport.authenticate('facebook'),
+        function (req, res) {
+            console.log(req, res)
+        });
+
+    app.get(
+        '/auth/facebook/callback',
+        passport.authenticate('facebook',{failureRedirect:'/login'}),
         function (req, res) {
             console.log(req, res)
         });
