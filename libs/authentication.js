@@ -56,7 +56,7 @@ module.exports = function (app) {
     * */
     app.get(
         '/auth/facebook',
-        passport.authenticate('facebook',{ scope: ['user_status', 'user_likes','email','user_friends']}),
+        passport.authenticate('facebook',{ scope: ['user_likes','email','user_friends']}),
         function (req, res) {/*
             this middleware will not be used since the request has been redirected to facebook servers
         */});
