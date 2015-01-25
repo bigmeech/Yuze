@@ -47,7 +47,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //do authentication bits
-auth(app, passport);
+auth(app);
 
 //load routes and models
 loader(app);
