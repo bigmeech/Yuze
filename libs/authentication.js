@@ -45,13 +45,22 @@ module.exports = function (app) {
         callbackURL: config.keys.facebook.callbackUrl
     }, function (accessToken, refreshToken, profile, done) {
 
+        /*
+        *
+        * If we get a Mongo Error with code 11000 after this, that means this user has used facebook login previously
+        * and exist in our system, instead of killing the app like we normally do to other errors we can just allow the user in
+        * regardless. But we have to find a way to send his user details back to the him
+        *
+        * */
         var LocalUserModel = DB.model('User');
         var LocalUser = new LocalUserModel();
         for(var property  in profile._json){
             LocalUser[property] = profile._json[property];
         }
         LocalUser.save(function(err, User){
-            if(err) return done(err, null);
+            if(err){
+                return done(err, null);
+            }
             return done(null, User);
         });
 
