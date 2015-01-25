@@ -3,6 +3,7 @@ var config = rek('config');
 var express = require('express');
 var FacebookStrategy = require("passport-facebook").Strategy;
 var passport = require("passport");
+var _ = require("lodash");
 var DB = rek("database");
 
 
@@ -43,8 +44,17 @@ module.exports = function (app) {
         clientSecret: config.keys.facebook.clientSecret,
         callbackURL: config.keys.facebook.callbackUrl
     }, function (accessToken, refreshToken, profile, done) {
+
         var LocalUserModel = DB.model('User');
-        return done(null, profile);
+        var LocalUser = new LocalUserModel();
+        for(var property  in profile._json){
+            LocalUser[property] = profile._json[property];
+        }
+        LocalUser.save(function(err, User){
+            if(err) return done(err, null);
+            return done(null, User);
+        });
+
     }));
 
     /*
