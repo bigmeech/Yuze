@@ -21,8 +21,7 @@ var app = module.exports = express();
 
 var sessionStore;
 mongoose.connection.once("open", function(err){
-    if(err) throw err
-    mongoose.GridStore = mongoose.mongo.GridStore
+    if(err) throw err;
     sessionStore = new MongoStore({mongoose_connection:mongoose.connection});
 });
 
@@ -38,9 +37,19 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: "somelongassname",
+    store: sessionStore,
+    resave: true,
+    saveUninitialized: true
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
-//load routes and models
-loader(app);
+app.use(require('./routes/index.js'));
 
 //do authentication bits
 auth(app);
+
+//load routes and models
+loader(app);

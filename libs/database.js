@@ -4,7 +4,7 @@ var mongoose = require("mongoose"),
     config = require("../config"),
     Grid = require("gridfs-stream");
 
-mongoose.connect( config.database['development'].url + "" + config.database['development'].name );
+mongoose.connect( config.database['deploy'].url + "" + config.database['deploy'].name );
 var db = mongoose.connection;
 db.on("error",function(errMsg){
     console.log("Error Connecting to Mongo: " + errMsg);

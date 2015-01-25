@@ -6,3 +6,8 @@ body {
 a {
   color: #00B7FF;
 }
+
+.policy{
+  width: 50%;
+  margin: 0 auto;
+}
