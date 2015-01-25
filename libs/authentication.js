@@ -41,8 +41,7 @@ module.exports = function (app) {
     passport.use(new FacebookStrategy({
         clientID: config.keys.facebook.clientID,
         clientSecret: config.keys.facebook.clientSecret,
-        callbackURL: config.keys.facebook.callbackUrl,
-        profileFields: ['id', 'displayName', 'photos','name', 'gender','profileUrl']
+        callbackURL: config.keys.facebook.callbackUrl
     }, function (accessToken, refreshToken, profile, done) {
         var LocalUserModel = DB.model('User');
         return done(null, profile);
