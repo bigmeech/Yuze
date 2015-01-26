@@ -117,8 +117,8 @@ module.exports = function (app) {
                         var newUser                 = new User();
 
                         // set all of the user data that we need
-                        newUser.twitter.id          = profile.id;
-                        newUser.twitter.username    = profile.username;
+                        newUser.twitterId          = profile.id;
+                        newUser.username    = profile.username;
 
                         // save our user into the database
                         newUser.save(function(err) {
