@@ -33,6 +33,7 @@ router.delete('/products/remove/:id', deleteProduct);
 
 router.put('/products/:productId/like/:userId', likeProduct);
 router.put('/products/:productId/follow/:userId', followProduct);
+router.get('/products/getTags/:productId/:tag', showProductsWithTags);
 router.post('/products/:productId/images/', multer(uploadOptions), uploadImageResponse);
 
 /*
@@ -54,6 +55,25 @@ function showProduct(req, res) {
     })
 };
 
+
+/*
+*
+* Shows product contain certain tags
+*
+* */
+
+
+function showProductsWithTags(req, res){
+    var input = req.params;
+
+    var Product = DB.model("Product");
+
+    Product.find({tags: {$in:[input.tag]}}, function (err, doc) {
+        if (err) return res.json(err);
+        if (!doc) return res.json({error: true, message: "No Such product found"}, 404);
+        return res.json(doc);
+    })
+}
 /*
  *
  * Delete Operation
@@ -114,6 +134,13 @@ function createProduct(req, res) {
     //get model
     var Product = DB.model('Product');
     var User = DB.model('User');
+
+    //process tags
+    input.tags = input.tags
+        .split(', ')
+        .map(function(tag){
+            return tag.toLowerCase();
+        });
 
     User.findOne({userId: req.params.userId}, function (err, User) {
 
