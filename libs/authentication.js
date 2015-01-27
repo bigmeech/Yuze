@@ -3,6 +3,7 @@ var config = rek('config');
 var express = require('express');
 var FacebookStrategy = require("passport-facebook").Strategy;
 var TwitterStrategy  = require('passport-twitter').Strategy;
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var passport = require("passport");
 var _ = require("lodash");
 var DB = rek("database");
@@ -86,7 +87,11 @@ module.exports = function (app) {
         function (req, res) {
             return res.json(req.session.passport.user);
         });
-
+    /*
+     *
+     * Twitter Strategy Definition
+     * --------------------------------
+     * */
 
     passport.use(new TwitterStrategy({
 
@@ -151,4 +156,77 @@ module.exports = function (app) {
         function (req, res) {
             return res.json(req.session.passport.user);
         });
+
+    /*
+     *
+     * Google Strategy Definition
+     * --------------------------------
+     * */
+
+    passport.use(new GoogleStrategy({
+
+            clientID        : config.keys.google.clientID,
+            clientSecret    : config.keys.google.clientSecret,
+            callbackURL     : config.keys.google.redirectURIs
+
+        },
+        function(token, refreshToken, profile, done) {
+
+            // make the code asynchronous
+            // User.findOne won't fire until we have all our data back from Google
+            process.nextTick(function() {
+
+                var User = DB.model('User');
+
+                // try to find the user based on their google id
+                User.findOne({ 'google.id' : profile.id }, function(err, user) {
+                    if (err)
+                        return done(err);
+
+                    if (user) {
+
+                        // if a user is found, log them in
+                        return done(null, user);
+                    } else {
+                        // if the user isnt in our database, create a new user
+                        var newUser          = new User();
+
+                        // set all of the relevant information
+                        newUser.googleId    = profile.id;
+                        newUser.username  = profile.displayName;
+                        newUser.email = profile.emails[0].value; // pull the first email
+
+                        // save the user
+                        newUser.save(function(err) {
+                            if (err)
+                                throw err;
+                            return done(null, newUser);
+                        });
+                    }
+                });
+            });
+
+        }));
+
+
+    /*
+     *
+     * google routes
+     *
+     *
+     * send to google to do the authentication
+     * profile gets us their basic information including their name
+     * email gets their emails
+     */
+    app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
+
+    // the callback after google has authenticated the user
+    app.get(
+        '/auth/google/callback',
+        passport.authenticate('google',{failureRedirect:'/login'}),
+        function (req, res) {
+            return res.json(req.session.passport.user);
+        });
+
 };
+
