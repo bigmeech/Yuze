@@ -13,7 +13,8 @@ var User = new Schema({
     hash: String,
     email: {type: String, index: {unique: true}},
     facebookId: {type: String, index: {unique: true}},
-    twitterId: {type: String, index: {unique: true}}
+    twitterId: {type: String, index: {unique: true}},
+    googleId: {type: String, index: {unique: true}}
 });
 User.plugin(autoIncrement.plugin, {model: 'User', field: 'userId', startAt: 1000});
 
