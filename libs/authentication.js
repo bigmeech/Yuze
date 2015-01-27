@@ -138,6 +138,8 @@ module.exports = function (app) {
      *
      * twitter routes
      *
+     * Twitter bitches a lot about local hostnames and only like real IPS and hostnames. So to make valid reuest during development,
+     * use 127.0.0.1 instead of localhost
      *
      * */
     app.get('/auth/twitter',
