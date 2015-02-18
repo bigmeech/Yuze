@@ -11,6 +11,8 @@ var User = new Schema({
     first_name: String,
     last_name: String,
     hash: String,
+    total_points: Number,
+    num_likes: Number,
     email: {type: String, index: {unique: true}},
     facebookId: {type: String, index: {unique: true}},
     twitterId: {type: String, index: {unique: true}},
