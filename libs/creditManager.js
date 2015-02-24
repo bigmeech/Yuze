@@ -2,7 +2,6 @@
  * Created by john.nana on 2/16/2015.
  */
 var express = require('express');
-var router = express.Router();
 var rek = require("rekuire");
 var _ = require("lodash");
 var config = rek('config');
@@ -13,31 +12,28 @@ var DB = rek('database');
 
 var ObjectId = DB.Schema.Types.ObjectId;
 
-router.post("/product/credit/:uid/:pointType", addCredit);
+/*router.post("/product/credit/:uid/:pointType", addCredit);*/
+var POINT_TYPES = {
+    LIKE:20,
+    CREATE:100
+};
 
 
+function addCredit(req, res){
 
-function addCredit(req,res){
-    var input = req.params;
-
-    var uid = input.uid;
-    var pointType = input.pointType;
-    var points;
-
-    if(pointType == 'like') points = 2;
-    if(pointType =='create') points =100;
+    var user = req.yuze.user;
 
     //get model
     var History = DB.model('History');
     var User = DB.model('User');
 
-    User.findOne({userId: uid}, function(err, u_doc){
+    User.findOne({userId: user.userId}, function(err, u_doc){
         if (err) return res.json(err, 404);
         if (!u_doc) return res.json({error: true, message: "User does not exist"}, 404);
 
         //construct document
         var h_doc ={owner: u_doc._id,
-                    points: points };
+                    points: POINT_TYPES.LIKE };
 
         var history = new History(h_doc);
 
@@ -52,4 +48,7 @@ function addCredit(req,res){
   }
 
 
-module.exports = router;
+module.exports = {
+    POINT_TYPES:POINT_TYPES,
+    addCredit:addCredit
+}

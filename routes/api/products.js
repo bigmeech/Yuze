@@ -7,6 +7,8 @@ var config = rek('config');
 var multer = require("multer");
 var commonFn = rek("common");
 
+var creditManager = rek("creditManager");
+
 //DB Object
 var DB = rek('database');
 
@@ -31,7 +33,7 @@ router.delete('/products/remove/:id', deleteProduct);
  *
  * */
 
-router.put('/products/:productId/like/:userId', likeProduct);
+router.put('/products/:productId/like/:userId', likeProduct, creditManager.addCredit);
 router.put('/products/:productId/follow/:userId', followProduct);
 router.get('/products/getTags/:productId/:tag', showProductsWithTags);
 router.post('/products/:productId/images/', multer(uploadOptions), uploadImageResponse);
@@ -175,7 +177,7 @@ function createProduct(req, res) {
  * */
 
 
-function likeProduct(req, res) {
+function likeProduct(req, res, next) {
     //get input from client
     var input = req.params;
 
@@ -197,6 +199,8 @@ function likeProduct(req, res) {
             var product = result[0],
                 user = result[1];
 
+
+
             if (!user) return res.json({error: true, message: "not a user, please sign up/sign in"});
             if (!product) return res.json({error: true, message: "cannot like a non-existing product"});
             if (user && product) {
@@ -207,7 +211,9 @@ function likeProduct(req, res) {
                         message: "could not like this product for some unknown reason",
                         errorObj: err
                     })
-                    return res.json(doc);
+                    req.yuze ={};
+                    req.yuze.user= user;
+                    return next();
                 });
             } else {
                 return res.json({error: true, message: "not a user, please sign up"})
